@@ -60,4 +60,11 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
+
+
+    //Networking
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+
+
 }
