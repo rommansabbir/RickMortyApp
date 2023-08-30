@@ -81,5 +81,8 @@ dependencies {
     //Glide
     implementation("com.github.bumptech.glide:compose:1.0.0-alpha.5")
 
+    //StoreX
+    implementation ("com.github.rommansabbir:StoreX:3.0.0")
+
 
 }
