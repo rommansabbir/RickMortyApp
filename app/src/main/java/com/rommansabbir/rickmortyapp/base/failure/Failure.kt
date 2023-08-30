@@ -2,13 +2,25 @@ package com.rommansabbir.rickmortyapp.base.failure
 
 /**
  * Class that represent any kind of managed error that occurs during the application runtime.
+ * Here we can define the HTTP Errors, Caching Error, Feature Error and so on.
  */
 sealed class Failure {
-    data class ActualException(val exception: Exception) : Failure()
-    object NetworkConnection : Failure()
-    object UnauthorizedError : Failure()
-    object CanNotConnectToTheServer : Failure()
-    object TooManyRequest : Failure()
+    data class ActualException(val exception: Throwable) : Failure()
+
+    /**
+     * Define all HTTP error here.
+     */
+    object HTTP {
+        object Forbidden : Failure()
+        object NotFound : Failure()
+        object MethodNotAllowed : Failure()
+        object NetworkConnection : Failure()
+        object UnauthorizedError : Failure()
+        object BadRequest : Failure()
+        object CanNotConnectToTheServer : Failure()
+        object TooManyRequest : Failure()
+        object InternalServerError : Failure()
+    }
 
     /*
     We can also manage feature specific errors here.
