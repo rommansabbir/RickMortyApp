@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace 'com.rommansabbir.rickmortyapp'
-    compileSdk 32
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.rommansabbir.rickmortyapp"
         minSdk 21
-        targetSdk 32
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -21,6 +21,9 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        //build config
+        buildConfigField("String", "BASE_API_URL", BASE_API_URL)
     }
 
     buildTypes {
@@ -40,7 +43,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.1.1'
+        kotlinCompilerExtensionVersion '1.4.4'
     }
     packagingOptions {
         resources {
@@ -72,7 +75,7 @@ dependencies {
 
     //Networking
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 
     //Hilt
     implementation("com.google.dagger:hilt-android:2.44")
@@ -83,6 +86,9 @@ dependencies {
 
     //StoreX
     implementation ("com.github.rommansabbir:StoreX:3.0.0")
+
+    //Gson
+    implementation ("com.google.code.gson:gson:2.10.1")
 
 
 }
