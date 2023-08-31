@@ -1,4 +1,4 @@
-package com.rommansabbir.rickmortyapp
+package com.rommansabbir.rickmortyapp.feature
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
