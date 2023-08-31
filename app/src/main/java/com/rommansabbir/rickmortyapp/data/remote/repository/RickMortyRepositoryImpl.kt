@@ -20,8 +20,8 @@ class RickMortyRepositoryImpl @Inject constructor(private val apiService: RickMo
         Check if @{paginatedURL} is null or not. If null call default api else call the @{paginatedURL}.
          */
         val apiToCall =
-            if (request.paginatedURL?.isNotEmpty() == true) apiService.getCharactersListDefault() else apiService.getCharactersListPaginated(
-                request.paginatedURL ?: ""
+            if (request.paginatedURL == null) apiService.getCharactersListDefault() else apiService.getCharactersListPaginated(
+                request.paginatedURL
             )
         return executeAPIRequestV2(
             apiToCall, { it }, RickMortyCharactersListAPIResponse()
