@@ -1,18 +1,18 @@
 package com.rommansabbir.rickmortyapp.base.di.modules
 
-import android.app.AppComponentFactory
 import com.rommansabbir.rickmortyapp.BuildConfig.BASE_API_URL
 import com.rommansabbir.storex.gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-@InstallIn(AppComponentFactory::class)
+@InstallIn(SingletonComponent::class)
 @Module
 object NetworkingModule {
     private val myHttpClient: OkHttpClient by lazy {
