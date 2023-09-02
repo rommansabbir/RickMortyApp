@@ -1,6 +1,5 @@
 package com.rommansabbir.rickmortyapp.base.composeext
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -42,30 +42,32 @@ fun SimpleToolbar(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .weight(.15F),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                if (showBackButton) {
+            if (showBackButton){
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .weight(.15F),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Box(
                         modifier = Modifier
                             .size(50.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            contentDescription = "",
-                            painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                            modifier = Modifier.clickable { onBackAction.invoke() })
+                        IconButton(onClick = { onBackAction() }) {
+                            Icon(
+                                contentDescription = "",
+                                painter = painterResource(id = R.drawable.baseline_arrow_back_24)
+                            )
+                        }
                     }
                 }
             }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .weight(.85F),
+                    .weight(if (showBackButton).85F else 1F),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -79,9 +81,9 @@ fun SimpleToolbar(
             }
         }
         if (showLoading) {
-            LinearProgressIndicator(FillMaxWidth().height(4.dp), Color.Cyan)
+            LinearProgressIndicator(FillMaxWidth().height(3.dp), Color(0xFF32CD32))
         } else {
-            Column(FillMaxWidth().height(4.dp)) {
+            Column(FillMaxWidth().height(3.dp)) {
 
             }
         }

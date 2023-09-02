@@ -2,6 +2,7 @@ package com.rommansabbir.rickmortyapp.feature
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -45,6 +46,14 @@ class MainActivity : ComponentActivity() {
     private val vm by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        this.onBackPressedDispatcher.addCallback(this) {
+            if (vm.uiState.showDetailsUI) {
+                vm.uiState.characterId = -1
+                vm.uiState.showDetailsUI = false
+            } else {
+                this@MainActivity.finish()
+            }
+        }
         vm.isFirstRun = true
         setContent {
             RickMortyAppTheme {
@@ -151,7 +160,7 @@ class MainActivity : ComponentActivity() {
         val scaffoldState = rememberScaffoldState()
         Scaffold(scaffoldState = scaffoldState, modifier = Modifier.fillMaxSize(), topBar = {
             SimpleToolbar(
-                title = "Rick and Morty",
+                title = if (uiState.showDetailsUI) "Character Details" else "Rick and Morty",
                 showBackButton = uiState.showDetailsUI,
                 showLoading = uiState.isLoading
             ) {

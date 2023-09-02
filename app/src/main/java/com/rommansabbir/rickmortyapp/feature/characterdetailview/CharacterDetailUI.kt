@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -53,17 +54,22 @@ fun CharacterDetailsUI(
             fontWeight = FontWeight.Bold,
             modifier = FillMaxWidth().padding(16.dp)
         )
-        GlideImage(
-            model = imageURL,
-            contentDescription = "",
+        Card(
+            shape = CircleShape,
             modifier = Modifier
                 .size(200.dp)
                 .aspectRatio(1F)
-                .padding(bottom = 16.dp),
-            contentScale = ContentScale.FillBounds
-        )
+                .padding(16.dp)
+        ) {
+            GlideImage(
+                model = imageURL,
+                contentDescription = "",
+                contentScale = ContentScale.FillBounds
+            )
+        }
+
         Card(
-            elevation = 8.dp, modifier = FillMaxWidth().padding(start = 16.dp, end = 16.dp)
+            elevation = 4.dp, modifier = FillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
             Column(
                 FillMaxWidth(),
@@ -103,7 +109,7 @@ fun CharacterDetailsUI(
                 Spacer(modifier = FillMaxWidth().height(16.dp))
             }
         }
-        Card(elevation = 8.dp, modifier = FillMaxWidth().padding(16.dp)) {
+        Card(elevation = 4.dp, modifier = FillMaxWidth().padding(16.dp)) {
             Column(
                 FillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
