@@ -1,16 +1,17 @@
-package com.rommansabbir.rickmortyapp.feature.dashboard
+package com.rommansabbir.rickmortyapp.feature.charactersview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -19,28 +20,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.rommansabbir.rickmortyapp.R
 
+
+/**
+ * Rick and Morty Character List UI (item).
+ *
+ * @param modifier Default [Modifier].
+ * @param id Character unique id.
+ * @param name Character name.
+ * @param imageUrl Character image url.
+ * @param species Character species.
+ * @param isAlive Is the character alive or not.
+ * @param gender Character's gender.
+ * @param onItemDetail Callback to be invoked on character item click.
+ */
+@OptIn(ExperimentalMaterialApi::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun DashboardUI() {
-
-}
-
-
-@Composable
-fun DashboardItem() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+fun CharacterView(
+    modifier: Modifier = Modifier,
+    id: Int,
+    name: String,
+    imageUrl: String,
+    species: String,
+    isAlive: Boolean,
+    gender: String,
+    onItemDetail: (id: Int) -> Unit
+) {
+    Card(modifier = modifier
+        .fillMaxWidth()
+        .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         elevation = 8.dp,
-        shape = RoundedCornerShape(10.dp)
-    ) {
+        shape = RoundedCornerShape(10.dp),
+        onClick = { onItemDetail.invoke(id) }) {
         Row(
             Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -49,24 +71,23 @@ fun DashboardItem() {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(.25F)
-                    .background(Color.White, RoundedCornerShape(10.dp)),
+                    .weight(.4F)
+                    .background(Color.White, RoundedCornerShape(10.dp))
+                    .aspectRatio(1F),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
+                GlideImage(
+                    model = imageUrl,
                     contentDescription = "",
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(100.dp),
+                    modifier = Modifier.padding(8.dp),
                     contentScale = ContentScale.FillBounds
                 )
             }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(.8F),
+                    .weight(.5F),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -74,23 +95,34 @@ fun DashboardItem() {
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
                 Text(
-                    text = "Test Name",
-                    fontSize = 20.sp,
+                    text = name,
+                    fontSize = 18.sp,
                     modifier = textModifier,
                     fontWeight = FontWeight.Bold,
                     textDecoration = TextDecoration.Underline
                 )
                 Text(
-                    text = "HUMAN", modifier = textModifier
+                    text = species, modifier = textModifier
                 )
+                val aliveStatus = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color.Black)) {
+                        append("$gender, (")
+                    }
+                    withStyle(style = SpanStyle(color = if (isAlive) Color.Blue else Color.Red)) {
+                        append(if (isAlive) "Alive" else "Dead")
+                    }
+                    withStyle(style = SpanStyle(color = Color.Black)) {
+                        append(")")
+                    }
+                }
                 Text(
-                    text = "Alive | Female", modifier = textModifier
+                    text = aliveStatus, modifier = textModifier
                 )
             }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(.15F),
+                    .weight(.1F),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -112,6 +144,8 @@ fun DashboardUIPreview() {
     Surface(
         Modifier.background(Color.Gray)
     ) {
-        DashboardItem()
+        CharacterView(
+            modifier = Modifier, id = 1, name = "Md. Romman Sabbir", "", "HUMAN", true, "Male"
+        ) {}
     }
 }
