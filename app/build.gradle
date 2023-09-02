@@ -74,8 +74,8 @@ dependencies {
 
 
     //Networking
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
@@ -87,10 +87,13 @@ dependencies {
     implementation("com.github.bumptech.glide:compose:1.0.0-alpha.5")
 
     //StoreX
-    implementation ("com.github.rommansabbir:StoreX:3.0.0")
+    implementation("com.github.rommansabbir:StoreX:3.0.0")
 
     //Gson
-    implementation ("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    //Network state observer
+    implementation("com.github.rommansabbir:NetworkX:4.2.0")
 
 
 }

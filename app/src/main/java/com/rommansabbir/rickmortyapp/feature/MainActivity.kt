@@ -16,15 +16,20 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
+import com.rommansabbir.networkx.NetworkXProvider
 import com.rommansabbir.rickmortyapp.base.composeext.FillMaxWidth
 import com.rommansabbir.rickmortyapp.base.composeext.InfiniteListHandler
 import com.rommansabbir.rickmortyapp.base.composeext.SimpleToolbar
@@ -81,6 +86,21 @@ class MainActivity : ComponentActivity() {
                     }
 
                     AppEntry(vm.uiState, vm.characterListUIState, vm.charactersDetailsViewUIState)
+                    if (vm.uiState.showNoInternetDialog) {
+                        AlertDialog(
+                            onDismissRequest = { vm.uiState.showNoInternetDialog = false },
+                            title = { Text("No internet!", fontSize = 20.sp) },
+                            text = { Text("Make sure device is connected to the internet.") },
+                            confirmButton = {
+
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { vm.uiState.showNoInternetDialog = false }) {
+                                    Text("Okay".uppercase())
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -92,21 +112,25 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchCharacterDetails(id: Int) {
         mainScope {
-            vm.uiState.isLoading = true
-            vm.charactersDetailsViewUIState.showRootView = false
-            val result = vm.getCharacterDetailRemote(
-                RickMortySingleCharacterAPIRequest(
-                    id = id
+            if (!NetworkXProvider.isInternetConnected) {
+                vm.uiState.showNoInternetDialog = true
+            } else {
+                vm.uiState.isLoading = true
+                vm.charactersDetailsViewUIState.showRootView = false
+                val result = vm.getCharacterDetailRemote(
+                    RickMortySingleCharacterAPIRequest(
+                        id = id
+                    )
                 )
-            )
-            if (result.isError()) {
+                if (result.isError()) {
+                    vm.uiState.isLoading = false
+                    return@mainScope
+                }
+                vm.mapAPIResponseToDetailUIState(result = result)
+                vm.charactersDetailsViewUIState.showRootView = true
                 vm.uiState.isLoading = false
-                return@mainScope
+                vm.uiState.showDetailsUI = true
             }
-            vm.mapAPIResponseToDetailUIState(result = result)
-            vm.charactersDetailsViewUIState.showRootView = true
-            vm.uiState.isLoading = false
-            vm.uiState.showDetailsUI = true
         }
     }
 
@@ -127,26 +151,30 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchDataFromRemote() {
         mainScope {
-            vm.uiState.showDetailsUI = false
-            vm.uiState.isLoading = true
-            vm.isFirstRun = false
-            val request = RickMortyCharactersListAPIRequest(
-                false, vm.characterListUIState.nextPaginatedURL
-            )
-            val result = vm.getCharacterListFromRemote(request = request)
-            if (result.isError()) {
-                vm.uiState.isLoading = false
-                return@mainScope
-            }
-            vm.mapAPIResponseToUIState(result)
-
-            vm.uiState.isLoading = false
-            //
-            vm.cacheCharactersListToLocal(
-                CacheCharactersListRequestModel(
-                    vm.characterListUIState.nextPaginatedURL, vm.characterListUIState.dataList
+            if (!NetworkXProvider.isInternetConnected) {
+                vm.uiState.showNoInternetDialog = true
+            } else {
+                vm.uiState.showDetailsUI = false
+                vm.uiState.isLoading = true
+                vm.isFirstRun = false
+                val request = RickMortyCharactersListAPIRequest(
+                    false, vm.characterListUIState.nextPaginatedURL
                 )
-            )
+                val result = vm.getCharacterListFromRemote(request = request)
+                if (result.isError()) {
+                    vm.uiState.isLoading = false
+                    return@mainScope
+                }
+                vm.mapAPIResponseToUIState(result)
+
+                vm.uiState.isLoading = false
+                //
+                vm.cacheCharactersListToLocal(
+                    CacheCharactersListRequestModel(
+                        vm.characterListUIState.nextPaginatedURL, vm.characterListUIState.dataList
+                    )
+                )
+            }
         }
     }
 
@@ -189,6 +217,10 @@ class MainActivity : ComponentActivity() {
                         .padding(values)
                 ) {
                     ShowCharactersListUI(uiState = charactersListUIState, state = state) {
+                        if (!NetworkXProvider.isInternetConnected) {
+                            uiState.showNoInternetDialog = true
+                            return@ShowCharactersListUI
+                        }
                         uiState.characterId = it
                         uiState.showDetailsUI = true
                         charactersDetailsViewUIState.loadData = true
