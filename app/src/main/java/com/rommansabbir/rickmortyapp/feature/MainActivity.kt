@@ -144,7 +144,8 @@ class MainActivity : ComponentActivity() {
                         imageUrl = it.image ?: "",
                         species = it.species ?: nullString(),
                         isAlive = it.status?.contains("alive", true) == true,
-                        gender = it.gender ?: nullString()
+                        gender = it.gender ?: nullString(),
+                        totalEpisodes = it.episode.size
                     ) {
 
                     }

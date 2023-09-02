@@ -74,7 +74,7 @@ class RickMortyCharactersListAPIResponse {
 
             @SerializedName("episode")
             @Expose
-            var episode: List<String>? = null
+            var episode: MutableList<String> = mutableListOf()
 
             @SerializedName("url")
             @Expose

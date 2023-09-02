@@ -43,6 +43,7 @@ import com.rommansabbir.rickmortyapp.R
  * @param species Character species.
  * @param isAlive Is the character alive or not.
  * @param gender Character's gender.
+ * @param totalEpisodes Characters total episode.
  * @param onItemDetail Callback to be invoked on character item click.
  */
 @OptIn(ExperimentalMaterialApi::class, ExperimentalGlideComposeApi::class)
@@ -55,6 +56,7 @@ fun CharacterView(
     species: String,
     isAlive: Boolean,
     gender: String,
+    totalEpisodes: Int,
     onItemDetail: (id: Int) -> Unit
 ) {
     Card(modifier = modifier
@@ -72,6 +74,7 @@ fun CharacterView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(.4F)
+                    .padding(4.dp)
                     .background(Color.White, RoundedCornerShape(10.dp))
                     .aspectRatio(1F),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -80,7 +83,7 @@ fun CharacterView(
                 GlideImage(
                     model = imageUrl,
                     contentDescription = "",
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(4.dp),
                     contentScale = ContentScale.FillBounds
                 )
             }
@@ -93,7 +96,7 @@ fun CharacterView(
             ) {
                 val textModifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
+                    .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
                 Text(
                     text = name,
                     fontSize = 18.sp,
@@ -117,6 +120,22 @@ fun CharacterView(
                 }
                 Text(
                     text = aliveStatus, modifier = textModifier
+                )
+                val totalEpisodes = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color.Black)) {
+                        append("EP(s): ")
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            color = Color.Red
+                        )
+                    ) {
+                        append(totalEpisodes.toString())
+                    }
+                }
+                Text(
+                    text = totalEpisodes,
+                    modifier = textModifier
                 )
             }
             Column(
@@ -145,7 +164,7 @@ fun DashboardUIPreview() {
         Modifier.background(Color.Gray)
     ) {
         CharacterView(
-            modifier = Modifier, id = 1, name = "Md. Romman Sabbir", "", "HUMAN", true, "Male"
+            modifier = Modifier, id = 1, name = "Md. Romman Sabbir", "", "HUMAN", true, "Male", 15
         ) {}
     }
 }
