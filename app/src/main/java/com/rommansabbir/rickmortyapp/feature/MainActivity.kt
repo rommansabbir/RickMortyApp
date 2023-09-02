@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
                         name = it.name ?: nullString(),
                         imageUrl = it.image ?: "",
                         species = it.species ?: nullString(),
-                        isAlive = it.status?.contains("alive") == true,
+                        isAlive = it.status?.contains("alive", true) == true,
                         gender = it.gender ?: nullString()
                     ) {
 
