@@ -1,27 +1,37 @@
 package com.rommansabbir.rickmortyapp.feature
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import com.rommansabbir.rickmortyapp.base.composeext.FillMaxWidth
 import com.rommansabbir.rickmortyapp.base.composeext.InfiniteListHandler
 import com.rommansabbir.rickmortyapp.base.composeext.SimpleToolbar
 import com.rommansabbir.rickmortyapp.data.local.models.CacheCharactersListRequestModel
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIRequest
+import com.rommansabbir.rickmortyapp.data.remote.models.RickMortySingleCharacterAPIRequest
+import com.rommansabbir.rickmortyapp.feature.characterdetailview.CharacterDetailsUI
+import com.rommansabbir.rickmortyapp.feature.characterdetailview.CharactersDetailsViewUIState
 import com.rommansabbir.rickmortyapp.feature.charactersview.CharacterView
 import com.rommansabbir.rickmortyapp.feature.charactersview.CharactersViewUIState
 import com.rommansabbir.rickmortyapp.ui.theme.RickMortyAppTheme
@@ -38,7 +48,6 @@ class MainActivity : ComponentActivity() {
         vm.isFirstRun = true
         setContent {
             RickMortyAppTheme {
-                val context = LocalContext.current
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
@@ -46,15 +55,23 @@ class MainActivity : ComponentActivity() {
                         vm.characterListUIState.loadData = false
                         LaunchedEffect(key1 = "", block = {
                             if (vm.isFirstRun) {
-                                fetchDataFromLocal(context)
+                                fetchDataFromLocal()
                             } else {
-                                fetchDataFromRemote(context)
+                                fetchDataFromRemote()
                             }
                         })
-                        //
                     }
 
-                    AppEntry(vm.uiState, vm.characterListUIState)
+
+                    if (vm.charactersDetailsViewUIState.loadData) {
+                        vm.charactersDetailsViewUIState.loadData = false
+                        if (vm.uiState.characterId != -1)
+                            LaunchedEffect(key1 = "", block = {
+                                fetchCharacterDetails(vm.uiState.characterId)
+                            })
+                    }
+
+                    AppEntry(vm.uiState, vm.characterListUIState, vm.charactersDetailsViewUIState)
                 }
             }
 
@@ -64,13 +81,34 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun fetchDataFromLocal(context: Context) {
+    private fun fetchCharacterDetails(id: Int) {
         mainScope {
+            vm.uiState.isLoading = true
+            vm.charactersDetailsViewUIState.showRootView = false
+            val result = vm.getCharacterDetailRemote(
+                RickMortySingleCharacterAPIRequest(
+                    id = id
+                )
+            )
+            if (result.isError()) {
+                vm.uiState.isLoading = false
+                return@mainScope
+            }
+            vm.mapAPIResponseToDetailUIState(result = result)
+            vm.charactersDetailsViewUIState.showRootView = true
+            vm.uiState.isLoading = false
+            vm.uiState.showDetailsUI = true
+        }
+    }
+
+    private fun fetchDataFromLocal() {
+        mainScope {
+            vm.uiState.showDetailsUI = false
             vm.uiState.isLoading = true
             val result = vm.getCharactersListFromLocal()
             if (result.isError()) {
                 vm.uiState.isLoading = false
-                fetchDataFromRemote(context)
+                fetchDataFromRemote()
                 return@mainScope
             }
             vm.mapAPIResponseToUIState(result)
@@ -78,8 +116,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun fetchDataFromRemote(context: Context) {
+    private fun fetchDataFromRemote() {
         mainScope {
+            vm.uiState.showDetailsUI = false
             vm.uiState.isLoading = true
             vm.isFirstRun = false
             val request = RickMortyCharactersListAPIRequest(
@@ -102,28 +141,77 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    private fun AppEntry(uiState: MainUIState, charactersListUIState: CharactersViewUIState) {
+    private fun AppEntry(
+        uiState: MainUIState,
+        charactersListUIState: CharactersViewUIState,
+        charactersDetailsViewUIState: CharactersDetailsViewUIState
+    ) {
         val scaffoldState = rememberScaffoldState()
         Scaffold(scaffoldState = scaffoldState, modifier = Modifier.fillMaxSize(), topBar = {
             SimpleToolbar(
-                title = "Rick and Morty", showBackButton = true, showLoading = uiState.isLoading
-            )
-        }) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(it)
+                title = "Rick and Morty",
+                showBackButton = uiState.showDetailsUI,
+                showLoading = uiState.isLoading
             ) {
-                ShowCharactersListUI(uiState = charactersListUIState)
+                uiState.characterId = -1
+                uiState.showDetailsUI = false
             }
+        }) { values ->
+            val state = rememberLazyListState()
+            if (uiState.showDetailsUI) {
+                CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+                    if (charactersDetailsViewUIState.showRootView) {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(values)
+                        ) {
+                            ShowCharacterDetailUI(uiState = charactersDetailsViewUIState)
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(values)
+                ) {
+                    ShowCharactersListUI(uiState = charactersListUIState, state = state) {
+                        uiState.characterId = it
+                        uiState.showDetailsUI = true
+                        charactersDetailsViewUIState.loadData = true
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ShowCharacterDetailUI(uiState: CharactersDetailsViewUIState) {
+        Column(
+            FillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CharacterDetailsUI(
+                name = uiState.title,
+                imageURL = uiState.image,
+                info = uiState.informationList,
+                totalEpisodes = uiState.totalEpisodes
+            )
         }
     }
 
 
     @Composable
-    private fun ShowCharactersListUI(uiState: CharactersViewUIState) {
-        val state = rememberLazyListState()
+    private fun ShowCharactersListUI(
+        uiState: CharactersViewUIState,
+        state: LazyListState,
+        onItemDetail: (id: Int) -> Unit
+    ) {
         InfiniteListHandler(listState = state) {
             uiState.loadData = true
         }
@@ -145,10 +233,9 @@ class MainActivity : ComponentActivity() {
                         species = it.species ?: nullString(),
                         isAlive = it.status?.contains("alive", true) == true,
                         gender = it.gender ?: nullString(),
-                        totalEpisodes = it.episode.size
-                    ) {
-
-                    }
+                        totalEpisodes = it.episode.size,
+                        onItemDetail = onItemDetail
+                    )
                 }
             }
         }
