@@ -33,6 +33,8 @@ import com.rommansabbir.networkx.NetworkXProvider
 import com.rommansabbir.rickmortyapp.base.composeext.FillMaxWidth
 import com.rommansabbir.rickmortyapp.base.composeext.InfiniteListHandler
 import com.rommansabbir.rickmortyapp.base.composeext.SimpleToolbar
+import com.rommansabbir.rickmortyapp.base.failure.Failure
+import com.rommansabbir.rickmortyapp.base.failure.manager.FailureManager
 import com.rommansabbir.rickmortyapp.data.local.models.CacheCharactersListRequestModel
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIRequest
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortySingleCharacterAPIRequest
@@ -45,9 +47,13 @@ import com.rommansabbir.rickmortyapp.utils.extensions.executeBodyOrReturnNull
 import com.rommansabbir.rickmortyapp.utils.extensions.mainScope
 import com.rommansabbir.rickmortyapp.utils.extensions.nullString
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var failureManager: FailureManager
+
     private val vm by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +82,6 @@ class MainActivity : ComponentActivity() {
                         })
                     }
 
-
                     if (vm.charactersDetailsViewUIState.loadData) {
                         vm.charactersDetailsViewUIState.loadData = false
                         if (vm.uiState.characterId != -1)
@@ -86,16 +91,18 @@ class MainActivity : ComponentActivity() {
                     }
 
                     AppEntry(vm.uiState, vm.characterListUIState, vm.charactersDetailsViewUIState)
-                    if (vm.uiState.showNoInternetDialog) {
+
+                    if (vm.uiState.failureMessage != null) {
+                        val message = vm.uiState.failureMessage ?: nullString()
                         AlertDialog(
-                            onDismissRequest = { vm.uiState.showNoInternetDialog = false },
-                            title = { Text("No internet!", fontSize = 20.sp) },
-                            text = { Text("Make sure device is connected to the internet.") },
+                            onDismissRequest = { vm.uiState.failureMessage = null },
+                            title = { Text("Error occurred!", fontSize = 20.sp) },
+                            text = { Text(message) },
                             confirmButton = {
 
                             },
                             dismissButton = {
-                                TextButton(onClick = { vm.uiState.showNoInternetDialog = false }) {
+                                TextButton(onClick = { vm.uiState.failureMessage = null }) {
                                     Text("Okay".uppercase())
                                 }
                             }
@@ -113,8 +120,11 @@ class MainActivity : ComponentActivity() {
     private fun fetchCharacterDetails(id: Int) {
         mainScope {
             if (!NetworkXProvider.isInternetConnected) {
-                vm.uiState.showNoInternetDialog = true
+                vm.uiState.failureMessage =
+                    failureManager.handleFailure(Failure.HTTP.NetworkConnection)
+                /*vm.uiState.showNoInternetDialog = true*/
             } else {
+                vm.uiState.failureMessage = null
                 vm.uiState.isLoading = true
                 vm.charactersDetailsViewUIState.showRootView = false
                 val result = vm.getCharacterDetailRemote(
@@ -124,8 +134,10 @@ class MainActivity : ComponentActivity() {
                 )
                 if (result.isError()) {
                     vm.uiState.isLoading = false
+                    vm.uiState.failureMessage = failureManager.handleFailure(result.asFailure())
                     return@mainScope
                 }
+                vm.uiState.failureMessage = null
                 vm.mapAPIResponseToDetailUIState(result = result)
                 vm.charactersDetailsViewUIState.showRootView = true
                 vm.uiState.isLoading = false
@@ -152,8 +164,11 @@ class MainActivity : ComponentActivity() {
     private fun fetchDataFromRemote() {
         mainScope {
             if (!NetworkXProvider.isInternetConnected) {
-                vm.uiState.showNoInternetDialog = true
+                vm.uiState.failureMessage =
+                    failureManager.handleFailure(Failure.HTTP.NetworkConnection)
+                /*vm.uiState.showNoInternetDialog = true*/
             } else {
+                vm.uiState.failureMessage = null
                 vm.uiState.showDetailsUI = false
                 vm.uiState.isLoading = true
                 vm.isFirstRun = false
@@ -162,9 +177,11 @@ class MainActivity : ComponentActivity() {
                 )
                 val result = vm.getCharacterListFromRemote(request = request)
                 if (result.isError()) {
+                    vm.uiState.failureMessage = failureManager.handleFailure(result.asFailure())
                     vm.uiState.isLoading = false
                     return@mainScope
                 }
+                vm.uiState.failureMessage = null
                 vm.mapAPIResponseToUIState(result)
 
                 vm.uiState.isLoading = false
@@ -218,12 +235,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     ShowCharactersListUI(uiState = charactersListUIState, state = state) {
                         if (!NetworkXProvider.isInternetConnected) {
-                            uiState.showNoInternetDialog = true
+                            /*uiState.showNoInternetDialog = true*/
+                            vm.uiState.failureMessage =
+                                failureManager.handleFailure(Failure.HTTP.NetworkConnection)
                             return@ShowCharactersListUI
+                        } else {
+                            vm.uiState.failureMessage = null
+                            uiState.characterId = it
+                            uiState.showDetailsUI = true
+                            charactersDetailsViewUIState.loadData = true
                         }
-                        uiState.characterId = it
-                        uiState.showDetailsUI = true
-                        charactersDetailsViewUIState.loadData = true
                     }
                 }
             }

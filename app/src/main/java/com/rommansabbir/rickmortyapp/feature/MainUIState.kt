@@ -9,5 +9,5 @@ import com.rommansabbir.rickmortyapp.base.uistate.BaseComposeUIState
 class MainUIState : BaseComposeUIState() {
     var showDetailsUI: Boolean by mutableStateOf(false)
     var characterId: Int by mutableIntStateOf(-1)
-    var showNoInternetDialog : Boolean by mutableStateOf(false)
+    var failureMessage : String? by mutableStateOf(null)
 }
