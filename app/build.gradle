@@ -8,12 +8,13 @@ plugins {
 
 android {
     namespace 'com.rommansabbir.rickmortyapp'
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.rommansabbir.rickmortyapp"
         minSdk 21
-        targetSdk 34
+        targetSdk 33
+        compileSdkPreview = "UpsideDownCake"
         versionCode 1
         versionName "1.0"
 
@@ -48,6 +49,11 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
         }
     }
 }
@@ -94,6 +100,10 @@ dependencies {
 
     //Network state observer
     implementation("com.github.rommansabbir:NetworkX:4.2.0")
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.9'
+    testImplementation 'androidx.test:core-ktx:1.5.0'
 
 
 }
