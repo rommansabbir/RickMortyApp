@@ -17,7 +17,7 @@ class APIEndpointsTestCases {
 
     @Test
     fun `check the base url matches to the rick and morty base url`() {
-        assert(retrofit.baseUrl().url().toString() == "https://rickandmortyapi.com/api/")
+        assert(retrofit.baseUrl().toUrl().toString() == "https://rickandmortyapi.com/api/")
     }
 
     @Test

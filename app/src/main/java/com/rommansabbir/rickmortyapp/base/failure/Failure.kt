@@ -22,6 +22,11 @@ sealed class Failure {
         object InternalServerError : Failure()
     }
 
+    object LocalCache {
+        object NotExistInCache : Failure()
+        data class FailedToCache(val message: String) : Failure()
+    }
+
     /*
     We can also manage feature specific errors here.
     The main goal is to have a central error channel where all manged errors are defined.
