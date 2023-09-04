@@ -1,11 +1,11 @@
 # Rick & Morty
 
 ## Build and Run
-1. Clone the Repository.
-2. Build and Run the Project.
+- Clone the Repository.
+- Build and Run the Project.
 
 ## Testing
-3. Run the command `gradle app:testDebugUnitTest` (Debug) or `gradle app:testReleaseUnitTest` (Release).
+- Run the command `gradle app:testDebugUnitTest` (Debug) or `gradle app:testReleaseUnitTest` (Release).
 
 ---
 
@@ -62,20 +62,13 @@ Let's explore...
 - ViewModel
 
 ---
-## Dependencies
-- Android Core (KTX)
-- Android Lifecycle
-- JetPack Compose
-- Retrofit
-- OkHttp
-- Gson
-- Hilt
-- Glide Image (Compose)
-- StoreX
-- NetworkX
-- JUnit
-- Roboletric
-- Android Test Core (KTX)
+## Local Caching Strategy
+When you open the app, it first attempts to retrieve data from the **local cache**. Here's how the caching strategy works:
+
+- If the local cache contains data and the retrieval is successful, the app loads the character list from the local cache. Additionally, it retrieves the next paginated URL for potential future data requests from the remote source.
+- If, for any reason, the app fails to retrieve data from the cache, it initiates a request to load data from the remote source.
+- With each subsequent character list `API` call, the app updates the cache with the latest data and the URL for the next paginated results. This ensures that the app consistently maintains up-to-date information for a seamless user experience.
+
 ---
 
 ## Notes
@@ -93,3 +86,20 @@ Let's explore...
 
 ## Missing Implementation
 - [ ] Integration of `LiveData` (LiveData is currently not utilized).
+---
+
+## Dependencies
+- Android Core (KTX)
+- Android Lifecycle
+- JetPack Compose
+- Retrofit
+- OkHttp
+- Gson
+- Hilt
+- Glide Image (Compose)
+- StoreX
+- NetworkX
+- JUnit
+- Roboletric
+- Android Test Core (KTX)
+---
