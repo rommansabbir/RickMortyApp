@@ -1,6 +1,6 @@
 package com.rommansabbir.rickmortyapp.data.local.repository
 
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.data.local.models.CacheCharactersListRequestModel
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIResponse
 
@@ -14,16 +14,16 @@ interface LocalCache {
      *
      * @param requestModel Model to be cached.
      *
-     * @return [APIResult]<[Boolean]>.
+     * @return [AppResult]<[Boolean]>.
      */
-    fun cacheCharactersListLocally(requestModel: CacheCharactersListRequestModel): APIResult<Boolean>
+    fun cacheCharactersListLocally(requestModel: CacheCharactersListRequestModel): AppResult<Boolean>
 
     /**
      * Get cached characters list from the local.
      * If found, parse the cached to the api response model
      * or if not found or error occurs return NotExistInCache failure.
      *
-     * @return [APIResult]<[RickMortyCharactersListAPIResponse]>
+     * @return [AppResult]<[RickMortyCharactersListAPIResponse]>
      */
-    fun getCharactersListFromLocal(): APIResult<RickMortyCharactersListAPIResponse>
+    fun getCharactersListFromLocal(): AppResult<RickMortyCharactersListAPIResponse>
 }

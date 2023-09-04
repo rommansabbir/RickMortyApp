@@ -1,7 +1,7 @@
 package com.rommansabbir.rickmortyapp.data.remote.repository
 
 import com.rommansabbir.rickmortyapp.base.api.client.executeAPIRequestV2
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.data.remote.api.RickMortyAPIService
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIRequest
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIResponse
@@ -16,7 +16,7 @@ import javax.inject.Inject
 class RickMortyRepositoryImpl @Inject constructor(private val apiService: RickMortyAPIService) :
     RickMortyRepository {
 
-    override fun getAllCharacters(request: RickMortyCharactersListAPIRequest): APIResult<RickMortyCharactersListAPIResponse> {/*
+    override fun getAllCharacters(request: RickMortyCharactersListAPIRequest): AppResult<RickMortyCharactersListAPIResponse> {/*
         Check if @{paginatedURL} is null or not. If null call default api else call the @{paginatedURL}.
          */
         val apiToCall =
@@ -28,7 +28,7 @@ class RickMortyRepositoryImpl @Inject constructor(private val apiService: RickMo
         )
     }
 
-    override fun getSingleCharacterDetails(request: RickMortySingleCharacterAPIRequest): APIResult<RickMortySingleCharacterDetailsAPIResponseModel> =
+    override fun getSingleCharacterDetails(request: RickMortySingleCharacterAPIRequest): AppResult<RickMortySingleCharacterDetailsAPIResponseModel> =
         executeAPIRequestV2(
             apiService.getCharacterDetail(request.id),
             { it },

@@ -1,28 +1,28 @@
-package com.rommansabbir.rickmortyapp.base.apiresult
+package com.rommansabbir.rickmortyapp.base.appresult
 
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult.Error
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult.Success
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult.Error
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult.Success
 import com.rommansabbir.rickmortyapp.base.failure.Failure
 
 /**
  * Sealed class that represent the API Results.
  *
- * [APIResult] has two state called [Success] and [Error].
+ * [AppResult] has two state called [Success] and [Error].
  */
-sealed class APIResult<T> {
+sealed class AppResult<T> {
     /**
-     * Represent the success state and return the instance of [APIResult].
+     * Represent the success state and return the instance of [AppResult].
      *
      * @param data [T] api response.
      */
-    class Success<T>(var data: T?) : APIResult<T>()
+    class Success<T>(var data: T?) : AppResult<T>()
 
     /**
-     * Represent the error state and return the instance of [APIResult].
+     * Represent the error state and return the instance of [AppResult].
      *
      * @param failure [Failure] to represent the error.
      */
-    class Error<T>(var failure: Failure) : APIResult<T>()
+    class Error<T>(var failure: Failure) : AppResult<T>()
 
     /**
      * To check if the instance of [Failure] is actually a [Failure].

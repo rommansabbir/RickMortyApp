@@ -1,6 +1,6 @@
 package com.rommansabbir.rickmortyapp.base.api.client
 
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.base.failure.Failure
 import retrofit2.Call
 
@@ -14,14 +14,14 @@ import retrofit2.Call
  * @param default to return the response body as the provided by the object type.
  * @param postRequest if you want to do something more with the response object.
  *
- * @return [APIResult].
+ * @return [AppResult].
  */
 fun <T, R> executeAPIRequestV2(
     call: Call<T>,
     transform: (T) -> R,
     default: T,
     postRequest: (R) -> Unit = {},
-): APIResult<R> {
+): AppResult<R> {
     return try {
         val response = call.execute()
         return when (response.isSuccessful) {
@@ -38,9 +38,9 @@ fun <T, R> executeAPIRequestV2(
                     e.printStackTrace()
                     logThis(e.message ?: SOMETHING_WENT_WRONG)
                 }*/
-                APIResult.Success(transformed)
+                AppResult.Success(transformed)
             }
-            false -> APIResult.Error(
+            false -> AppResult.Error(
                 getFailureTypeAccordingToHTTPCode(
                     response.code()
                 )
@@ -48,7 +48,7 @@ fun <T, R> executeAPIRequestV2(
         }
     } catch (exception: Throwable) {
         // We can write a local log here if we want.
-        APIResult.Error(Failure.ActualException(exception))
+        AppResult.Error(Failure.ActualException(exception))
     }
 }
 

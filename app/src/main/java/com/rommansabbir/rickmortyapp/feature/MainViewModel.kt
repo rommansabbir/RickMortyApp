@@ -1,7 +1,7 @@
 package com.rommansabbir.rickmortyapp.feature
 
 import androidx.lifecycle.ViewModel
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.base.interactor.UseCase
 import com.rommansabbir.rickmortyapp.data.local.models.CacheCharactersListRequestModel
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIRequest
@@ -57,9 +57,9 @@ class MainViewModel @Inject constructor(
      *
      * @param request Request model.
      *
-     * @return [APIResult]<[RickMortyCharactersListAPIResponse]>
+     * @return [AppResult]<[RickMortyCharactersListAPIResponse]>
      */
-    suspend fun getCharacterListFromRemote(request: RickMortyCharactersListAPIRequest): APIResult<RickMortyCharactersListAPIResponse> =
+    suspend fun getCharacterListFromRemote(request: RickMortyCharactersListAPIRequest): AppResult<RickMortyCharactersListAPIResponse> =
         characterListUseCase(request)
 
     /**
@@ -67,17 +67,17 @@ class MainViewModel @Inject constructor(
      *
      * @param request Request model.
      *
-     * @return [APIResult]<[RickMortyCharactersListAPIResponse]>
+     * @return [AppResult]<[RickMortyCharactersListAPIResponse]>
      */
-    suspend fun getCharacterDetailRemote(request: RickMortySingleCharacterAPIRequest): APIResult<RickMortySingleCharacterDetailsAPIResponseModel> =
+    suspend fun getCharacterDetailRemote(request: RickMortySingleCharacterAPIRequest): AppResult<RickMortySingleCharacterDetailsAPIResponseModel> =
         getCharacterDetailUseCase(request)
 
     /**
      * Get new characters list from the local cache. Either success or error.
      *
-     * @return [APIResult]<[RickMortyCharactersListAPIResponse]>
+     * @return [AppResult]<[RickMortyCharactersListAPIResponse]>
      */
-    suspend fun getCharactersListFromLocal(): APIResult<RickMortyCharactersListAPIResponse> =
+    suspend fun getCharactersListFromLocal(): AppResult<RickMortyCharactersListAPIResponse> =
         getCharactersListFromLocalUseCase(
             UseCase.None()
         )
@@ -89,21 +89,21 @@ class MainViewModel @Inject constructor(
      *
      * @param request Request model.
      *
-     * @return [APIResult]<[Boolean]>
+     * @return [AppResult]<[Boolean]>
      */
     suspend fun cacheCharactersListToLocal(request: CacheCharactersListRequestModel) =
         cacheCharactersListToLocalUseCase(request)
 
     /**
      * Extract the characters list api response model from
-     * the [APIResult]<[RickMortyCharactersListAPIResponse]> and update the
+     * the [AppResult]<[RickMortyCharactersListAPIResponse]> and update the
      * list into the [characterListUIState].
      *
      * Make sure all works get done under [Dispatchers.Default].
      *
-     * @param result [RickMortyCharactersListAPIResponse] wrapped into [APIResult].
+     * @param result [RickMortyCharactersListAPIResponse] wrapped into [AppResult].
      */
-    suspend fun mapAPIResponseToUIState(result: APIResult<RickMortyCharactersListAPIResponse>) {
+    suspend fun mapAPIResponseToUIState(result: AppResult<RickMortyCharactersListAPIResponse>) {
         withContext(Dispatchers.Default) {
             val apiResponse = result.asSuccess<RickMortyCharactersListAPIResponse>()
             characterListUIState.nextPaginatedURL = apiResponse.paginationInfo.next
@@ -115,14 +115,14 @@ class MainViewModel @Inject constructor(
 
     /**
      * Extract the characters details model from
-     * the [APIResult]<[RickMortySingleCharacterDetailsAPIResponseModel]> and update the
+     * the [AppResult]<[RickMortySingleCharacterDetailsAPIResponseModel]> and update the
      * list into the [charactersDetailsViewUIState].
      *
      * Make sure all works get done under [Dispatchers.Default].
      *
-     * @param result [RickMortySingleCharacterDetailsAPIResponseModel] wrapped into [APIResult].
+     * @param result [RickMortySingleCharacterDetailsAPIResponseModel] wrapped into [AppResult].
      */
-    suspend fun mapAPIResponseToDetailUIState(result: APIResult<RickMortySingleCharacterDetailsAPIResponseModel>) {
+    suspend fun mapAPIResponseToDetailUIState(result: AppResult<RickMortySingleCharacterDetailsAPIResponseModel>) {
         withContext(Dispatchers.Default) {
             val apiResponse = result.asSuccess<RickMortySingleCharacterDetailsAPIResponseModel>()
             charactersDetailsViewUIState.title = apiResponse.name ?: nullString()

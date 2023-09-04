@@ -1,7 +1,7 @@
 package com.rommansabbir.rickmortyapp.data.local.repository
 
 import android.content.Context
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.base.failure.Failure
 import com.rommansabbir.rickmortyapp.data.local.models.CacheCharactersListRequestModel
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIResponse
@@ -15,27 +15,27 @@ import javax.inject.Inject
 
 class LocalCacheImpl @Inject constructor(private val context: Context) :
     LocalCache {
-    override fun cacheCharactersListLocally(requestModel: CacheCharactersListRequestModel): APIResult<Boolean> {
+    override fun cacheCharactersListLocally(requestModel: CacheCharactersListRequestModel): AppResult<Boolean> {
         return executeBodyOrReturnNull {
             val config = getCacheCharactersListConfig(context = context, requestModel)
             SmartStoreX.getInstance.write(config = config)
-            APIResult.Success(true)
-        } ?: kotlin.run { APIResult.Error(Failure.LocalCache.FailedToCache("Failed to cache.")) }
+            AppResult.Success(true)
+        } ?: kotlin.run { AppResult.Error(Failure.LocalCache.FailedToCache("Failed to cache.")) }
     }
 
-    override fun getCharactersListFromLocal(): APIResult<RickMortyCharactersListAPIResponse> {
+    override fun getCharactersListFromLocal(): AppResult<RickMortyCharactersListAPIResponse> {
         return executeBodyOrReturnNull {
             val cachedData = SmartStoreX.getInstance.read<CacheCharactersListRequestModel>(
                 getCacheCharactersListConfig(
                     context = context, CacheCharactersListRequestModel(null, mutableListOf())
                 ), CacheCharactersListRequestModel::class.java
-            ) ?: return@executeBodyOrReturnNull APIResult.Error(Failure.LocalCache.NotExistInCache)
-            return@executeBodyOrReturnNull APIResult.Success<RickMortyCharactersListAPIResponse>(
+            ) ?: return@executeBodyOrReturnNull AppResult.Error(Failure.LocalCache.NotExistInCache)
+            return@executeBodyOrReturnNull AppResult.Success<RickMortyCharactersListAPIResponse>(
                 RickMortyCharactersListAPIResponse().apply {
                     this.results.addAll(cachedData.list)
                     this.paginationInfo.next = cachedData.paginatedURL
                 })
-        } ?: kotlin.run { APIResult.Error(Failure.LocalCache.NotExistInCache) }
+        } ?: kotlin.run { AppResult.Error(Failure.LocalCache.NotExistInCache) }
     }
 
     /**

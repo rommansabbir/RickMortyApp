@@ -1,6 +1,6 @@
 package com.rommansabbir.rickmortyapp.data.remote.repository
 
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIRequest
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortyCharactersListAPIResponse
 import com.rommansabbir.rickmortyapp.data.remote.models.RickMortySingleCharacterAPIRequest
@@ -14,14 +14,14 @@ interface RickMortyRepository {
     /**
      * Get all Rick and Morty Characters (Paginated).
      *
-     * @return [APIResult]<[RickMortyCharactersListAPIResponse]>
+     * @return [AppResult]<[RickMortyCharactersListAPIResponse]>
      */
-    fun getAllCharacters(request: RickMortyCharactersListAPIRequest): APIResult<RickMortyCharactersListAPIResponse>
+    fun getAllCharacters(request: RickMortyCharactersListAPIRequest): AppResult<RickMortyCharactersListAPIResponse>
 
     /**
      * Get single character details.
      *
-     * @return [APIResult]<[RickMortySingleCharacterDetailsAPIResponseModel]>
+     * @return [AppResult]<[RickMortySingleCharacterDetailsAPIResponseModel]>
      */
-    fun getSingleCharacterDetails(request: RickMortySingleCharacterAPIRequest): APIResult<RickMortySingleCharacterDetailsAPIResponseModel>
+    fun getSingleCharacterDetails(request: RickMortySingleCharacterAPIRequest): AppResult<RickMortySingleCharacterDetailsAPIResponseModel>
 }

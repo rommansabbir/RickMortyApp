@@ -1,6 +1,6 @@
 package com.rommansabbir.rickmortyapp.base.interactor
 
-import com.rommansabbir.rickmortyapp.base.apiresult.APIResult
+import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -10,10 +10,10 @@ import kotlinx.coroutines.withContext
  * It's also help to execute the request under [Dispatchers.IO] Context.
  */
 abstract class UseCase<Type, in Params> where Type : Any {
-    abstract suspend fun run(params: Params): APIResult<Type>
+    abstract suspend fun run(params: Params): AppResult<Type>
     suspend operator fun invoke(
         params: Params
-    ): APIResult<Type> = withContext(Dispatchers.IO) { run(params) }
+    ): AppResult<Type> = withContext(Dispatchers.IO) { run(params) }
 
     class None
 }

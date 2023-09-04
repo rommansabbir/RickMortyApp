@@ -115,7 +115,7 @@ fun CharacterDetailsUI(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                val totalEpisodes = buildAnnotatedString {
+                val totalEPs = buildAnnotatedString {
                     withStyle(style = SpanStyle(color = Color.Black)) {
                         append("Total Episodes: ")
                     }
@@ -128,7 +128,7 @@ fun CharacterDetailsUI(
                     }
                 }
                 Text(
-                    text = totalEpisodes,
+                    text = totalEPs,
                     textAlign = TextAlign.Center,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
