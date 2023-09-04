@@ -50,9 +50,9 @@ Let's explore...
 - Clients initiate requests to specific **UseCases** (Domain Layer) to obtain data.
 
 In simple terms:
-- The UI initiates a request to the UseCase, which passes the request to the Repository.
-- The Repository performs its operations and returns the data to the UseCase, which then passes it back to the UI.
-- Additionally, the UseCase ensures that the entire operation is performed on a different thread/scope, not the UI/Main thread.
+- The UI initiates a request to the **UseCase**, which passes the request to the **Repository**.
+- The **Repository** performs its operations and returns the data to the **UseCase**, which then passes it back to the **UI**.
+- Additionally, the **UseCase** ensures that the entire operation is performed on a different _thread/scope_, not the _UI/Main_ thread.
 
 ---
 
