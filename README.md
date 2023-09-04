@@ -1,16 +1,18 @@
 # Rick & Morty
 
-### Build and Run
+## Build and Run
 1. Clone the Repository.
-2. **Build** and **Run** the Project.
+2. Build and Run the Project.
 
-### Testing
+## Testing
 3. Run the command `gradle app:testDebugUnitTest` (Debug) or `gradle app:testReleaseUnitTest` (Release).
----
-### Project Detail
-Note: This is a demo project but you might find out there are lots of codes which is not required for this king of test project. What I tried to acheive is having a proper project architecture to extend the project into a large scale project and most importantly makes it maintainable and testable.
 
-- Clean Arch
+---
+
+## Project Detail
+**Note**: This is a demo project, and you may notice that there is a significant amount of code that may not be necessary for a project of this scale. My primary goal was to establish a robust project architecture that can easily be scaled and, more importantly, maintainable and testable.
+
+- Clean Architecture
 - Dependency Injection
 - MVVM
 - JetPack Compose
@@ -20,56 +22,74 @@ Note: This is a demo project but you might find out there are lots of codes whic
 
 ---
 
-### Project Architecture
-![image](https://github.com/rommansabbir/RickMortyApp/assets/25950083/3196183b-1d10-45a9-ba81-78bb76314b2e)
+## Project Architecture
+![Project Architecture](https://github.com/rommansabbir/RickMortyApp/assets/25950083/3196183b-1d10-45a9-ba81-78bb76314b2e)
 ### UI ↔️ Domain ↔️ Data
 
 Let's explore...
 
 **Data Layer**:
-- Data layer is resposnsible to provide data to the client (UI).
-- Data layer is independent from the rest of the application.
-- Data layer mainly contain Repository, API Serivce, Local Caching, Local Database including their respective implementation.
-- Data layer should be testable independently.
-- Data layer should contain pure java/kotlin code but in some certain cases may include Framework Dependency (`ex:` **Local Caching** require `Context`)
-- Client request to data layer to provide the requested data.
+- The data layer is responsible for providing data to the client (UI).
+- It operates independently of the rest of the application.
+- The data layer primarily contains the Repository, API Service, Local Caching, Local Database, and their respective implementations.
+- It should be designed to be independently testable.
+- While the data layer should consist mainly of pure Java/Kotlin code, in some cases, it may include framework dependencies (e.g., **Local Caching** requiring `Context`).
+- Clients request data from the data layer to obtain the required information.
 
-**Domain Layer**
-- Domain layer is more a like an **Interactor** between two component or module or system.
-- Domain layer mainly contain **UseCase**'s.
-- Client request to the **Domain layer** (UseCase) and **Domain layer** request to the **Data Layer** and then return the response to the client.
-- Each business logic has their own **UseCase** (`ex:` Login functionality should have an **UseCase** of it's own).
-- UseCase also make sure that the ongoing request __MUST NOT RUN UNDER THE UI THREAD__, rather than run on different Thread/Scope.
-- UseCase must have only one `API`.
+**Domain Layer**:
+- The domain layer acts as an **Interactor** between various components, modules, or systems.
+- It primarily houses **UseCases**.
+- Clients request actions from the **Domain Layer** (UseCase), which then delegates these requests to the **Data Layer** and returns the response to the client.
+- Each business logic component has its dedicated **UseCase** (e.g., the Login functionality should have its dedicated **UseCase**).
+- The UseCase ensures that ongoing requests **DO NOT RUN ON THE UI THREAD** but rather on separate Threads/Scopes.
+- Each UseCase should have only one `API`.
 
-**UI Layer (Client)**
-- Represent the data into UI.
-- Divided into two parts (`View` and `ViewModel`). `View` present the `UI` and `ViewModel` to perform business logic of that View and manage **States**.
-- Client make request to spcific **UseCase** (Domain Layer) to get the data.
+**UI Layer (Client)**:
+- This layer is responsible for presenting data in the user interface.
+- It's divided into two components: `View` and `ViewModel`. `View` is responsible for displaying the UI, while `ViewModel` handles the business logic of that View and manages States.
+- Clients initiate requests to specific **UseCases** (Domain Layer) to obtain data.
 
-Simply,
-- UI request to the UseCase, UseCase pass the request to the Repository.
-- Repository perform it's execution and return the data to th UseCase, UseCase then return the data to the UI.
-- Also, UseCase make sure the the whole operation if performed under a differnent thread/scope but not in the UI/Main thread.
+In simple terms:
+- The UI initiates a request to the UseCase, which passes the request to the Repository.
+- The Repository performs its operations and returns the data to the UseCase, which then passes it back to the UI.
+- Additionally, the UseCase ensures that the entire operation is performed on a different thread/scope, not the UI/Main thread.
+
 ---
 
-### Testing
+## Testing
 - APIs
 - UseCases
 - ViewModel
 
+---
+## Dependencies
+- Android Core (KTX)
+- Android Lifecycle
+- JetPack Compose
+- Retrofit
+- OkHttp
+- Gson
+- Hilt
+- Glide Image (Compose)
+- StoreX
+- NetworkX
+- JUnit
+- Roboletric
+- Android Test Core (KTX)
+---
+
+## Notes
+- **AppResult** is a sealed class designed to represent the outcome of an execution, with two possible states: `Success` or `Error`.
+- **Failure** is a global sealed class that covers all managed errors in the application, including HTTP errors, caching errors, and feature-specific errors, among others.
+- **StringBuilderExtensions** contains extension functions for writing strings to variables. It's widely used in the **Data Layer** to map JSON to POJO/Model objects.
+- **executeBodyOrReturnNull** is an extension function used to execute a given `body` or return `null` by utilizing Try/Catch under the hood.
+- **ComponentActivity.mainScope** is an extension function for launching a new `Main Coroutine` using the associated `lifecycleScope`. This function is primarily used to perform operations within the `Activity`'s `lifecycleScope`.
+- The state of **Views (Composables)** is managed within the `ViewModel`. Each **View** has its own **UI State**.
+- **Network Availability** is managed within the **UI Layer** due to its dependency on the underlying framework.
+- To check internet connectivity status, the **NetworkX** library is utilized, which was also developed by me.
+- For local caching, **StoreX** is employed, another library developed by me. Instead of using **Room** or any other database for local caching, **StoreX** is preferred due to its superior computational performance. It stores data in the application's **Cache** folder.
 
 ---
-### Notes
-- **AppResult** is a sealed class to represent a execution result. It has two state `Success` or `Error` which some public `APIs`.
-- **Failure** is a global sealed class that represent all managed errors in the application such as _HTTP Error_, _Caching Error_, _Feature Specfific Error_ etc.
-- **StringBuilderExtensions** contain extension function to write string to a variable. Highly used in the **Data Layer** to map `JSON` to `POJO`/`Model`.
-- **executeBodyOrReturnNull** is an extension function to execute a given `body` or return `null` by leveraging the `Try/Catch` under the hood.
-- **ComponentActivity.mainScope** is an extension function to lauch new `Main Coroutine` by leveraging the associated `lifecycleScope`. The main use of this function to perform any execution under the `Activity`'s `lifecycleScope`.
-- **View (Composable)** state is managed inside `ViewModel`. Each **View** has it's own **UI State**
-- **Network Availability** is managed from the **UI Layer** because of having dependency on the **Framework**.
-- To check internent connectivity status, used **NetworkX** library which is also developed by me.
-- For local caching **StoreX** is used, which is also developed by me. I haven't use **Room** or any other _database_ for local caching since the computation performance is higer for Database and **StoreX** is file based caching library, store data in the application's **Cache** folder.
----
-### Missing impl
-- [ ] Usages of `LiveData` (`LiveData` is not used.)
+
+## Missing Implementation
+- [ ] Integration of `LiveData` (LiveData is currently not utilized).
