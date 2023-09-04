@@ -3,6 +3,7 @@ package com.rommansabbir.rickmortyapp.base.api.client
 import com.rommansabbir.rickmortyapp.base.appresult.AppResult
 import com.rommansabbir.rickmortyapp.base.failure.Failure
 import retrofit2.Call
+import java.net.UnknownHostException
 
 /**
  * Execute a new API request to the server side.
@@ -40,6 +41,7 @@ fun <T, R> executeAPIRequestV2(
                 }*/
                 AppResult.Success(transformed)
             }
+
             false -> AppResult.Error(
                 getFailureTypeAccordingToHTTPCode(
                     response.code()
@@ -47,8 +49,14 @@ fun <T, R> executeAPIRequestV2(
             )
         }
     } catch (exception: Throwable) {
-        // We can write a local log here if we want.
-        AppResult.Error(Failure.ActualException(exception))
+        when (exception) {
+            is UnknownHostException -> {
+                AppResult.Error(Failure.HTTP.NetworkConnection)
+            }
+            // We can write a local log here if we want.
+            else -> {AppResult.Error(Failure.ActualException(exception))}
+        }
+
     }
 }
 
