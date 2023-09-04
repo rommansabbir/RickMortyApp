@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import com.rommansabbir.networkx.NetworkXProvider
+import com.rommansabbir.rickmortyapp.R
 import com.rommansabbir.rickmortyapp.base.composeext.FillMaxWidth
 import com.rommansabbir.rickmortyapp.base.composeext.InfiniteListHandler
 import com.rommansabbir.rickmortyapp.base.composeext.SimpleToolbar
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
     lateinit var failureManager: FailureManager
 
     private val vm by viewModels<MainViewModel>()
+    private var isInternetConnected: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.onBackPressedDispatcher.addCallback(this) {
@@ -68,6 +70,12 @@ class MainActivity : ComponentActivity() {
         vm.isFirstRun = true
         setContent {
             RickMortyAppTheme {
+                /*
+                Character list view state should be managed here out of character list view,
+                otherwise it will recompose the state again and again,
+                will cause network leverage again.
+                 */
+                val listViewState = rememberLazyListState()
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
@@ -78,6 +86,8 @@ class MainActivity : ComponentActivity() {
                                 fetchDataFromLocal()
                             } else {
                                 fetchDataFromRemote()
+                                // update first run to false when data loaded from the remote.
+                                vm.isFirstRun = false
                             }
                         })
                     }
@@ -90,28 +100,60 @@ class MainActivity : ComponentActivity() {
                             })
                     }
 
-                    AppEntry(vm.uiState, vm.characterListUIState, vm.charactersDetailsViewUIState)
+                    AppEntry(
+                        vm.uiState,
+                        vm.characterListUIState,
+                        vm.charactersDetailsViewUIState,
+                        listViewState
+                    )
 
                     if (vm.uiState.failureMessage != null) {
                         val message = vm.uiState.failureMessage ?: nullString()
                         AlertDialog(
                             onDismissRequest = { vm.uiState.failureMessage = null },
-                            title = { Text("Error occurred!", fontSize = 20.sp) },
+                            title = { Text(getString(R.string.error_occurred), fontSize = 20.sp) },
                             text = { Text(message) },
                             confirmButton = {
 
                             },
                             dismissButton = {
                                 TextButton(onClick = { vm.uiState.failureMessage = null }) {
-                                    Text("Okay".uppercase())
+                                    Text(getString(R.string.okay).uppercase())
                                 }
                             }
                         )
+                    }
+
+                    InfiniteListHandler(listState = listViewState, buffer = 1) {
+                        if (!vm.isFirstRun && isInternetConnected) {
+                            vm.characterListUIState.loadData = true
+                        }
+                        if (vm.isFirstRun && isInternetConnected) {
+                            vm.characterListUIState.loadData = true
+                        }
                     }
                 }
             }
 
         }
+        initializeDataLoading()
+        NetworkXProvider.isInternetConnectedLiveData.observe(this) {
+            // update the status
+            this.isInternetConnected = it == true
+            /*
+            When device is connected to the and before then there was no internet and
+            when app first run, start the data loading initialization again.
+             */
+            if (it && vm.isFirstRun) {
+                initializeDataLoading()
+            }
+        }
+    }
+
+    /**
+     * Start to load characters list from the local or remote.
+     */
+    private fun initializeDataLoading() {
         if (vm.characterListUIState.dataList.isEmpty()) {
             vm.characterListUIState.loadData = true
         }
@@ -119,11 +161,7 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchCharacterDetails(id: Int) {
         mainScope {
-            if (!NetworkXProvider.isInternetConnected) {
-                vm.uiState.failureMessage =
-                    failureManager.handleFailure(Failure.HTTP.NetworkConnection)
-                /*vm.uiState.showNoInternetDialog = true*/
-            } else {
+            if (isInternetConnected) {
                 vm.uiState.failureMessage = null
                 vm.uiState.isLoading = true
                 vm.charactersDetailsViewUIState.showRootView = false
@@ -142,6 +180,9 @@ class MainActivity : ComponentActivity() {
                 vm.charactersDetailsViewUIState.showRootView = true
                 vm.uiState.isLoading = false
                 vm.uiState.showDetailsUI = true
+            } else {
+                vm.uiState.failureMessage =
+                    failureManager.handleFailure(Failure.HTTP.NetworkConnection)
             }
         }
     }
@@ -153,9 +194,21 @@ class MainActivity : ComponentActivity() {
             val result = vm.getCharactersListFromLocal()
             if (result.isError()) {
                 vm.uiState.isLoading = false
-                fetchDataFromRemote()
+                vm.uiState.failureMessage = null
+                when {
+                    isInternetConnected -> {
+                        fetchDataFromRemote()
+                    }
+                    // when there is no data in cache and apps first run then show internet error.
+                    vm.isFirstRun -> {
+                        vm.uiState.failureMessage =
+                            failureManager.handleFailure(Failure.HTTP.NetworkConnection)
+                    }
+                }
                 return@mainScope
             }
+            // update first run to false when data loaded from the cache.
+            vm.isFirstRun = false
             vm.mapAPIResponseToUIState(result)
             vm.uiState.isLoading = false
         }
@@ -163,15 +216,10 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchDataFromRemote() {
         mainScope {
-            if (!NetworkXProvider.isInternetConnected) {
-                vm.uiState.failureMessage =
-                    failureManager.handleFailure(Failure.HTTP.NetworkConnection)
-                /*vm.uiState.showNoInternetDialog = true*/
-            } else {
+            if (isInternetConnected) {
                 vm.uiState.failureMessage = null
                 vm.uiState.showDetailsUI = false
                 vm.uiState.isLoading = true
-                vm.isFirstRun = false
                 val request = RickMortyCharactersListAPIRequest(
                     false, vm.characterListUIState.nextPaginatedURL
                 )
@@ -188,7 +236,8 @@ class MainActivity : ComponentActivity() {
                 //
                 vm.cacheCharactersListToLocal(
                     CacheCharactersListRequestModel(
-                        vm.characterListUIState.nextPaginatedURL, vm.characterListUIState.dataList
+                        vm.characterListUIState.nextPaginatedURL,
+                        vm.characterListUIState.dataList
                     )
                 )
             }
@@ -200,7 +249,8 @@ class MainActivity : ComponentActivity() {
     private fun AppEntry(
         uiState: MainUIState,
         charactersListUIState: CharactersViewUIState,
-        charactersDetailsViewUIState: CharactersDetailsViewUIState
+        charactersDetailsViewUIState: CharactersDetailsViewUIState,
+        listViewState: LazyListState
     ) {
         val scaffoldState = rememberScaffoldState()
         Scaffold(scaffoldState = scaffoldState, modifier = Modifier.fillMaxSize(), topBar = {
@@ -213,7 +263,6 @@ class MainActivity : ComponentActivity() {
                 uiState.showDetailsUI = false
             }
         }) { values ->
-            val state = rememberLazyListState()
             if (uiState.showDetailsUI) {
                 CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
                     if (charactersDetailsViewUIState.showRootView) {
@@ -233,18 +282,11 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .padding(values)
                 ) {
-                    ShowCharactersListUI(uiState = charactersListUIState, state = state) {
-                        if (!NetworkXProvider.isInternetConnected) {
-                            /*uiState.showNoInternetDialog = true*/
-                            vm.uiState.failureMessage =
-                                failureManager.handleFailure(Failure.HTTP.NetworkConnection)
-                            return@ShowCharactersListUI
-                        } else {
-                            vm.uiState.failureMessage = null
-                            uiState.characterId = it
-                            uiState.showDetailsUI = true
-                            charactersDetailsViewUIState.loadData = true
-                        }
+                    ShowCharactersListUI(uiState = charactersListUIState, state = listViewState) {
+                        vm.uiState.failureMessage = null
+                        uiState.characterId = it
+                        uiState.showDetailsUI = true
+                        charactersDetailsViewUIState.loadData = true
                     }
                 }
             }
@@ -274,9 +316,6 @@ class MainActivity : ComponentActivity() {
         state: LazyListState,
         onItemDetail: (id: Int) -> Unit
     ) {
-        InfiniteListHandler(listState = state) {
-            uiState.loadData = true
-        }
         LazyColumn(
             state = state
         ) {

@@ -11,4 +11,6 @@
     <string name="failure_not_found">Not found.</string>
     <string name="failure_too_many_request">Too many request.</string>
     <string name="failure_unauthorized_error">Unauthorized error.</string>
+    <string name="okay">Okay</string>
+    <string name="error_occurred">Error occurred!</string>
 </resources>
